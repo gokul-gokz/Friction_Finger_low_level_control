@@ -159,7 +159,7 @@ bool slide_right_up(ros::NodeHandle n, float position)
 {
  
  // To Hold the object 
- send_pos=hold_object(n,0.52,0.84);
+ //send_pos=hold_object(n,0.52,0.84);
  
  // Setting modes [Left -Position, Right- Torque]
  int modes[]={3,0};
@@ -208,7 +208,7 @@ bool slide_right_down(ros::NodeHandle n, float position)
 {
  
  // To Hold the object 
- send_pos=hold_object(n,0.52,0.84);
+ //send_pos=hold_object(n,0.52,0.84);
 
  // Setting modes [Left -Torque, Right- Position]
  int modes[]={0,3};
@@ -257,7 +257,7 @@ bool slide_left_down(ros::NodeHandle n, float position)
 {
  
 // To Hold the object 
- send_pos=hold_object(n,0.52,0.84);
+ //send_pos=hold_object(n,0.52,0.84);
  
  // Setting modes [Left -Position, Right- Torque]
  int modes[]={3,0};
@@ -307,7 +307,7 @@ bool slide_left_up(ros::NodeHandle n, float position)
 {
  
  // To Hold the object 
- send_pos=hold_object(n,0.52,0.84);
+ //send_pos=hold_object(n,0.52,0.84);
  
  // Setting modes [Left -Torque, Right- Position]
  int modes[]={0,3};
@@ -357,7 +357,7 @@ bool slide_left_up(ros::NodeHandle n, float position)
 bool rotate_clockwise(ros::NodeHandle n,float position)
 {
  // To Hold the object 
- send_pos=hold_object(n,0.52,0.84);
+ //send_pos=hold_object(n,0.52,0.84);
  
 // Setting modes [Left -Position, Right- Torque]
  int modes[]={3,0};
@@ -376,7 +376,7 @@ bool rotate_clockwise(ros::NodeHandle n,float position)
   {
    ROS_INFO("TT");
    // Commanding position in increments for smooth control
-    for(float i= 0.52;i>=position;i=i-0.01)
+    for(float i= 0.593;i>=position;i=i-0.01)
    {   
     send_pos=command_position(n,0,i);
     }
@@ -402,10 +402,11 @@ bool rotate_clockwise(ros::NodeHandle n,float position)
   }
 }
 
+// Need to change this function to get two arguments as input [start,end]
 bool rotate_anticlockwise(ros::NodeHandle n,float position)
 {
  // To Hold the object 
- send_pos=hold_object(n,0.52,0.84);
+ //send_pos=hold_object(n,0.52,0.84);
  
 // Setting modes [Left -Torque, Right- Position]
  int modes[]={0,3};
@@ -414,7 +415,7 @@ bool rotate_anticlockwise(ros::NodeHandle n,float position)
 // Setting Friction Surface [Right -High, Right- High]
  set_friction_l = set_friction_left(n,false);
  set_friction_r = set_friction_right(n,false);
- ros::Duration(1).sleep();
+ //ros::Duration(1).sleep();
  
 // Execute the Rotate anticlockwise functionality
  if(set_friction_l && set_friction_r)
@@ -424,7 +425,7 @@ bool rotate_anticlockwise(ros::NodeHandle n,float position)
   {
    ROS_INFO("TT");
    // Commanding position in increments for smooth control
-    for(float i= 0.84;i>=position;i=i-0.01)
+    for(float i= 0.93;i>=position;i=i-0.01)
    {   
     send_pos=command_position(n,1,i);
     }

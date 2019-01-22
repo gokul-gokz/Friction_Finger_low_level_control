@@ -1,8 +1,10 @@
+#!/usr/bin/env python
 from mpmath  import *
 from sympy import *
 import numpy as np
-
-
+import rospy
+from friction_finger_gripper.srv import*
+import std_msgs.msg
 
 def ik_finger(x, y, wp, w0):
 	d1, t1 = symbols('d1 t2')
@@ -58,6 +60,61 @@ def finger_translation2(w0, wp, t2, d2):
 	d1 = np.sqrt((d1v*d1v).sum())
 	return (t1, d1)
 
+def slide_left_finger_down(p):
+	#Call Left_Slide_Down(till left most position) Assume t1 = pi/6
+	rospy.wait_for_service('Slide_Left_Finger_Down')
+	try:
+		slide_left_down = rospy.ServiceProxy('Slide_Left_Finger_Down',PositionCommand)
+		resp1 = slide_left_down(p)
+	except rospy.ServiceException, e:
+		print "Service call failed: %s"%e
+
+def slide_left_finger_up(p):
+	rospy.wait_for_service('Slide_Left_Finger_Up')
+	try:
+		slide_left_up = rospy.ServiceProxy('Slide_Left_Finger_Up',PositionCommand)
+		resp1 = slide_left_up(p)
+	except rospy.ServiceException, e:
+		print "Service call failed: %s"%e
+
+def slide_right_finger_down(p):
+	#Call Left_Slide_Down(till left most position) Assume t1 = pi/6
+	rospy.wait_for_service('Slide_Right_Finger_Down')
+	try:
+		slide_right_down = rospy.ServiceProxy('Slide_Right_Finger_Down',PositionCommand)
+		resp1 = slide_right_down(p)
+	except rospy.ServiceException, e:
+		print "Service call failed: %s"%e
+
+def slide_right_finger_up(p):
+	rospy.wait_for_service('Slide_Right_Finger_Up')
+	try:
+		slide_right_up = rospy.ServiceProxy('Slide_Right_Finger_Up',PositionCommand)
+		resp1 = slide_right_up(p)
+	except rospy.ServiceException, e:
+		print "Service call failed: %s"%e
+
+
+def rotate_object_anticlockwise(p):
+	rospy.wait_for_service('Rotate_anticlockwise')
+	try:
+		rotate_anti = rospy.ServiceProxy('Rotate_anticlockwise',PositionCommand)
+		resp1 = rotate_anti(p)
+	except rospy.ServiceException, e:
+		print "Service call failed: %s"%e
+
+def rotate_object_clockwise(p): #0.35
+	rospy.wait_for_service('Rotate_clockwise')
+	try:
+		Rotate_clockwise = rospy.ServiceProxy('Rotate_clockwise',PositionCommand)
+		resp1 = Rotate_clockwise(p)
+	except rospy.ServiceException, e:
+		print "Service call failed: %s"%e
+
+
+
+
+
 def finger_planning(x, y, w0, wp, t1, t2, d1, d2):
 	# Calculate Desired Position Parameters
 	t1_d, t2_d, d1_d, d2_d = ik_finger(x, y, w0, wp)
@@ -72,16 +129,19 @@ def finger_planning(x, y, w0, wp, t1, t2, d1, d2):
 				t1, d1 = finger_translation2(w0, wp, t2, d2)
 				print d1_d, d1, d2_d, d2
 			# Call Left_Slide_Up(t1, t2)
+			slide_left_finger_up(t2)
 			while (d2 < d2_d and t1 < 5*pi/6):
 				t1 = t1 + 0.01
 				t2, d2 = finger_translation1(w0, wp, t1, d1)
 				print d1_d, d1, d2_d, d2
 			# Call Right_Slide_Up(t1, t2)
+			slide_right_finger_up(t1)
 			d1t = d1
 			d2t = d2
 			print d1_d, d1, d2_d, d2
 		t2, d2 = finger_translation1(w0, wp, t1_d, d1)
 		# Call Left_Slide_Up(t1_d, t2)
+		slide_left_finger_up(t2)
 
 	else:
 		while ((d1_d - d1) < 0.001 or (d2_d - d2) < 0.001):
@@ -89,49 +149,78 @@ def finger_planning(x, y, w0, wp, t1, t2, d1, d2):
 				t2 = t2 + 0.01
 				t1, d1 = finger_translation2(w0, wp, t2, d2)
 			#Call Left_Slide_Down(t1, t2)
+			slide_left_finger_down(t1)
 			while (d2 > d2_d and t1 > pi/6):
 				t1 = t1 - 0.01
 				t2, d2 = finger_translation1(w0, wp, t1, d1)
 			# Call Right_Slide_Down(t1, t2)
+			slide_right_finger_down(t2)
 			d1t = d1
 			d2t = d2
 		t2, d2 = finger_translation1(w0, wp, t1_d, d1)
 		# Call Left_Slide_Down(t1_d, t2)
+		slide_left_finger_down(t1_d)
 	print t1_d, t1, t2_d, t2
 
 
-d1 = 7.5
-d2 = 7.5
-t1 = np.pi/2
-t2 = np.pi/2
-w0 = 2
-wp = 2
 
-n = 0 # n = 1 -> Anticlockwise rotation, n = 0 -> Clockwise
+if __name__ == "__main__": 
+	d1 = 7.5
+	d2 = 7.5
+	t1 = np.pi/2
+	t2 = np.pi/2
+	w0 = 2
+	wp = 2
+	x=1
+	y=2
 
-if n == 1:	
-	t1, d1 = finger_translation2(w0, wp, t2, d2)	
-	#Call Left_Slide_Down(till left most position) Assume t1 = pi/6
-	while (t2 >= pi/6):
-		t2, d2 = finger_translation1(w0, wp, t1, d1)
-		t1 = t1 - 0.01
-	t1, d1 = finger_translation2(w0, wp, t2, d2)
-	t2f = np.arccos(((d1 - w0)**2 + w0**2 - (d2+w0)**2 - wp**2)/(2*wp*(d2 + w0))) 
-	# Call Rotate_anticlockwise(t2f)
-	d1 = d1 - w0
-	d2 = d2 + w0
-if n == 0:
-	t2, d2 = finger_translation1(w0, wp, t1, d1)
-	#Call Right_Slide_Down(till right most position) Assume t2 = 5*pi/6	
-	while (t1 <= np.pi *5/6):
-		t1, d1 = finger_translation2(w0, wp, t2, d2)
-		t2 = t2 + 0.01
+	n = 0 # n = 1 -> Anticlockwise rotation, n = 0 -> Clockwise
 	
-	t2, d2 = finger_translation1(w0, wp, t1, d1)
-	t1f = np.pi - np.arccos((((d2-w0)**2 + w0**2 - wp**2 - (d1 + w0)**2)/(2*wp*(d1+w0))))
-	print t1f
-	# Call Rotate_clockwise(t1f)
-	d1 = d1 + w0
-	d2 = d2 - w0
+	#Hold object
+	rospy.wait_for_service('Hold_object')
+	try:
+		hold_object = rospy.ServiceProxy('Hold_object',Holdcommand)
+		#req = friction_finger_gripper.srv.PositionCommandRequest(0.52,0.64)
+		#resp1 = hold_object(req)
+		resp1 = hold_object(0.52,0.84)
+	except rospy.ServiceException, e:
+		print "Service call failed: %s"%e
+	
+	if n == 1:	
+		t1, d1 = finger_translation2(w0, wp, t2, d2)
+			
+		#Call Left_Slide_Down(till left most position) Assume t1 = pi/6
+		slide_left_finger_down(0.36)
+       
+		while (t2 >= pi/6):
+			t2, d2 = finger_translation1(w0, wp, t1, d1)
+			t1 = t1 - 0.01
+		t1, d1 = finger_translation2(w0, wp, t2, d2)
+		t2f = np.arccos(((d1 - w0)**2 + w0**2 - (d2+w0)**2 - wp**2)/(2*wp*(d2 + w0))) 
+		# Call Rotate_anticlockwise(t2f)
 
-finger_planning(x, y, w0, wp, t1, t2, d1, d2)
+		rotate_object_anticlockwise(0.70)
+
+
+
+		d1 = d1 - w0
+		d2 = d2 + w0
+	if n == 0:
+		t2, d2 = finger_translation1(w0, wp, t1, d1)
+		#Call Right_Slide_Down(till right most position) Assume t2 = 5*pi/6
+		slide_right_finger_down(0.70)
+
+	
+		while (t1 <= np.pi *5/6):
+			t1, d1 = finger_translation2(w0, wp, t2, d2)
+			t2 = t2 + 0.01
+	
+		t2, d2 = finger_translation1(w0, wp, t1, d1)
+		t1f = np.pi - np.arccos((((d2-w0)**2 + w0**2 - wp**2 - (d1 + w0)**2)/(2*wp*(d1+w0))))
+		print t1f
+
+
+		# Call Rotate_clockwise(t1f)
+		rotate_object_clockwise(0.35)
+
+	finger_planning(x, y, w0, wp, t1, t2, d1, d2)	

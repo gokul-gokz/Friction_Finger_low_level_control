@@ -1,6 +1,6 @@
 #include <friction_finger_gripper/controller_client.hpp>
 #include <friction_finger_gripper/PositionCommand.h>
-
+#include <friction_finger_gripper/Holdcommand.h>
 
 
 bool slide_right_finger_up(friction_finger_gripper::PositionCommand::Request &req,
@@ -60,12 +60,12 @@ bool home_position(friction_finger_gripper::PositionCommand::Request &req,
 }
 
 //Need to be fixed
-bool hold_object1(common_msgs_gl::SendDoubleArray::Request &req,
-                    common_msgs_gl::SendDoubleArray::Response &res)
+bool hold_object1(friction_finger_gripper::Holdcommand::Request &req,
+                  friction_finger_gripper::Holdcommand::Response &res)
 {
   bool success;
   ros::NodeHandle n1;
-  success = hold_object(n1,req.data[0],req.data[1]);;
+  success = hold_object(n1,req.left,req.right);
   return true;
 }
 
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
   
    ros::ServiceServer service_7 = n.advertiseService("Home_position", home_position);
   
-   //ros::ServiceServer service_8 = n.advertiseService("Hold_object", hold_object1);
+   ros::ServiceServer service_8 = n.advertiseService("Hold_object", hold_object1);
   ros::spin();
 
   return 0;
