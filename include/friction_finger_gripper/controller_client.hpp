@@ -176,8 +176,10 @@ bool slide_right_up(ros::NodeHandle n, float position)
   send_torque=command_torque(n,1,0.15);
   if(send_torque)
   {
+   float initial_position;
+   initial_position=read_position(n,1);
     // Commanding position in increments for smooth control
-    for(float i= 0.52;i>=position;i=i-0.01)
+    for(float i= initial_position;i>=position;i=i-0.01)
    {   
     send_pos=command_position(n,0,i);
     }
@@ -225,8 +227,10 @@ bool slide_right_down(ros::NodeHandle n, float position)
   send_torque=command_torque(n,0,0.15);
   if(send_torque)
   {
+    float initial_position;
+    initial_position=read_position(n,2);
     // Commanding position in increments for smooth control
-    for(float i= 0.84;i>=position;i=i-0.01)
+    for(float i= initial_position;i>=position;i=i-0.01)
    {   
     send_pos=command_position(n,1,i);
     }
@@ -274,8 +278,10 @@ bool slide_left_down(ros::NodeHandle n, float position)
   send_torque=command_torque(n,1,0.15);
   if(send_torque)
   {
+    float initial_position;
+    initial_position=read_position(n,1);
     // Commanding position in increments for smooth control
-    for(float i= 0.52;i>=position;i=i-0.01)
+    for(float i= initial_position;i>=position;i=i-0.01)
    {   
     send_pos=command_position(n,0,i);
     }
@@ -324,8 +330,10 @@ bool slide_left_up(ros::NodeHandle n, float position)
   send_torque=command_torque(n,0,0.15);
   if(send_torque)
   {
+    float initial_position;
+    initial_position=read_position(n,2);
     // Commanding position in increments for smooth control
-    for(float i= 0.84;i>=position;i=i-0.01)
+    for(float i= initial_position;i>=position;i=i-0.01)
    {   
     send_pos=command_position(n,1,i);
     }
@@ -375,8 +383,10 @@ bool rotate_clockwise(ros::NodeHandle n,float position)
   if(send_torque)
   {
    ROS_INFO("TT");
+    float initial_position;
+    initial_position=read_position(n,1);
    // Commanding position in increments for smooth control
-    for(float i= 0.593;i>=position;i=i-0.01)
+    for(float i= initial_position;i>=position;i=i-0.01)
    {   
     send_pos=command_position(n,0,i);
     }
@@ -424,8 +434,10 @@ bool rotate_anticlockwise(ros::NodeHandle n,float position)
   if(send_torque)
   {
    ROS_INFO("TT");
+    float initial_position;
+    initial_position=read_position(n,2);
    // Commanding position in increments for smooth control
-    for(float i= 0.93;i>=position;i=i-0.01)
+    for(float i= initial_position;i>=position;i=i-0.01)
    {   
     send_pos=command_position(n,1,i);
     }
@@ -461,40 +473,8 @@ bool Home_position(ros::NodeHandle n)
 }
 
 
-/*int main(int argc, char *argv[])
-{
- ros::init(argc,argv,"Client_controller");
- ros::NodeHandle n;
- //bool set_modes,send_pos,send_torque,read_pos;
- bool f;
- //f=slide_right_up(n,0.45);
-  //f=slide_left_down(n,0.35);
-  //f=slide_right_down(n,0.7845);
-  //f=slide_left_up(n,0.7045);  
-   //f= rotate_clockwise(n,0.35);   
-   f= rotate_anticlockwise(n,0.70);
 
-
-
- //int modes[]={3,3};
- //set_modes=set_actuator_modes(n,2,modes);
- 
- //while(read_position(n,1)>=(0.37))
- //{
- //send_pos=command_position(n,0,0.35);
- //}
- //while(read_position(n,1)<=(0.6))
- //{
- //ros::Duration(0.5).sleep();
- //send_pos=command_position(n,0,0.62);
- //}
- 
-/* for(int j=0;j<10;j++)
-{
- set_modes=set_actuator_modes(n,2,modes);
- send_torque=command_torque(n,0,0.01);
-
- while(read_position(n,2)<=(0.078-0.02))
+ /*while(read_position(n,2)<=(0.078-0.02))
 {
  ROS_INFO("yyy");
  ROS_INFO("%f",read_position(n,2));
@@ -511,7 +491,3 @@ bool Home_position(ros::NodeHandle n)
  ROS_INFO("%f",read_position(n,1));
  send_pos=command_position(n,0,0.65); 
 }*/
- //ros::spin();
- //}
- //return 0;
-//}
