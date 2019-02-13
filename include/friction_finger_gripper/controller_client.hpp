@@ -68,7 +68,7 @@ bool command_position(ros::NodeHandle n,int motor_num, float position)
   if(client_position.call(srv))
   {
    ros::Duration(0.5).sleep(); 
-   ROS_INFO("Command_position_Success");
+   ROS_INFO("Command_position[%d]_Success=[%f]",motor_num,position);
    return 1;
   }
   else
@@ -332,6 +332,7 @@ bool slide_left_up(ros::NodeHandle n, float position)
   {
     float initial_position;
     initial_position=read_position(n,2);
+    ROS_INFO("Current position = %f",initial_position);
     // Commanding position in increments for smooth control
     for(float i= initial_position;i>=position;i=i-0.01)
    {   
@@ -372,8 +373,8 @@ bool rotate_clockwise(ros::NodeHandle n,float position)
  set_modes=set_actuator_modes(n,2,modes);
 
 // Setting Friction Surface [Right -High, Right- High]
- set_friction_l = set_friction_left(n,false);
- set_friction_r = set_friction_right(n,false);
+ set_friction_l = set_friction_left(n,true);
+ set_friction_r = set_friction_right(n,true);
  ros::Duration(1).sleep();
  
 // Execute the Rotate clockwise functionality
@@ -423,8 +424,8 @@ bool rotate_anticlockwise(ros::NodeHandle n,float position)
  set_modes=set_actuator_modes(n,2,modes);
 
 // Setting Friction Surface [Right -High, Right- High]
- set_friction_l = set_friction_left(n,false);
- set_friction_r = set_friction_right(n,false);
+ set_friction_l = set_friction_left(n,true);
+ set_friction_r = set_friction_right(n,true);
  //ros::Duration(1).sleep();
  
 // Execute the Rotate anticlockwise functionality

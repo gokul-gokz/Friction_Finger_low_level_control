@@ -12,8 +12,10 @@ import std_msgs.msg
 def angle_conversion(angle,flag): 
 	if(flag==1):
 		n_angle = 0.377+(139-angle*180/pi)/360
+		print("Gripper_angle=",angle*180/3.14)
 	else:
-		n_angle= (angle*180/pi-41.47)/360 + 0.702
+		n_angle= (angle*180/pi-41.47)/360 +0.668
+		print("Gripper_angle=",angle*180/3.14)
 	print("n_angle",n_angle)
 	return (n_angle)
 		
@@ -76,6 +78,73 @@ def finger_translation2(w0, wp, t2, d2):
 	d1 = np.sqrt((d1v*d1v).sum())
 	return (t1, d1)
 
+def finger_planning(x, y, w0, wp, t1, t2, d1, d2):
+	# Calculate Desired Position Parameters
+	t1_d, t2_d, d1_d, d2_d = ik_finger(x, y, w0, wp)
+	print (d1_d, float(d2_d), t1_d, t2_d)
+	# Path Planning
+	d1t = d1
+	d2t = d2
+	
+	if (d1_d > d1 and d2_d > d2):
+		while ((d1_d - d1) > 0.001 or (d2_d - d2)> 0.001):
+			while (d1 < d1_d and t2 > 41.47*pi/180):
+				t2 = t2 - 0.01
+				t1, d1 = finger_translation2(w0, wp, t2, d2)
+				
+				#print (d1_d, d1, d2_d, d2)
+			# Call Left_Slide_Up(t1, t2)
+			#print (d1, d1_d, d2, d2_d)			
+			#slide_left_finger_up((t2*180/pi - 23.5)*0.00218 + 0.6993)
+			print("t2=",t2)
+			print("d1=",d1)
+			print("d2=",d2)
+			slide_right_finger_up(angle_conversion(t1,0))
+			while (d2 < d2_d and t1 < 138.53*pi/180):
+				t1  = t1 + 0.01
+				t2, d2 = finger_translation1(w0, wp, t1, d1)
+				#print (d1_d, d1, d2_d, d2)
+			# Call Right_Slide_Up(t1, t2)
+			#print (d1, d1_d, d2, d2_d)			
+			#slide_right_finger_up(0.4862-0.00181*(t1*180/pi-90))
+			print ("t1=",t1)
+			print ("d2=",d2)		
+			print("d1=",d1)
+			slide_left_finger_up(angle_conversion(t1,0))
+			d1t = d1
+			d2t = d2
+			#print (d1_d, d1, d2_d, d2)
+		t2, d2 = finger_translation1(w0, wp, t1_d, d1)
+		# Call Left_Slide_Up(t1_d, t2)
+		slide_left_finger_up(angle_conversion(t1_d,0))
+
+	else:	
+		while ((d1_d - d1) < 0.001 or (d2_d - d2) < 0.001):
+			print("t2=",t2)
+			print("d1=",d1)
+			print("d1_d=",d1_d)
+			while (d1 > d1_d and t2 < 138.53*pi/180):
+				t2 = t2 + 0.01
+				t1, d1 = finger_translation2(w0, wp, t2, d2)
+				print("d1=",d1)
+			
+			print ("d2=",d2)		
+			print("d1=",d1)
+			slide_right_finger_down(angle_conversion(t2,1))
+			while (d2 > d2_d and t1 > 41.47*pi/180):
+				t1 = t1 - 0.01
+				t2, d2 = finger_translation1(w0, wp, t1, d1)
+				print ("d2=",d2)
+			print ("d2=",d2)		
+			print("d1=",d1)
+			slide_left_finger_down(angle_conversion(t1,0))
+			d1t = d1
+			d2t = d2
+		t2, d2 = finger_translation1(w0, wp, t1_d, d1)
+		# Call Left_Slide_Down(t1_d, t2)
+		slide_left_finger_down(angle_conversion(t1_d,0))
+	#print (t1_d, t1, t2_d, t2)
+
 def slide_left_finger_down(p):
 	#Call Left_Slide_Down(till left most position) Assume t1 = pi/6
 	rospy.wait_for_service('Slide_Left_Finger_Down')
@@ -131,66 +200,12 @@ def rotate_object_clockwise(p): #0.35
 
 
 
-def finger_planning(x, y, w0, wp, t1, t2, d1, d2):
-	# Calculate Desired Position Parameters
-	t1_d, t2_d, d1_d, d2_d = ik_finger(x, y, w0, wp)
-	print (d1_d, float(d2_d))
-	# Path Planning
-	d1t = d1
-	d2t = d2
-	
-	if (d1_d > d1 and d2_d > d2):
-		while ((d1_d - d1) > 0.001 or (d2_d - d2)> 0.001):
-			while (d1 < d1_d and t2 < 138.53*pi/180):
-				t2 = t2 + 0.01
-				t1, d1 = finger_translation2(w0, wp, t2, d2)
-				#print (d1_d, d1, d2_d, d2)
-			# Call Left_Slide_Up(t1, t2)
-			#print (d1, d1_d, d2, d2_d)			
-			#slide_left_finger_up((t2*180/pi - 23.5)*0.00218 + 0.6993)
-			print("t2=",t2)
-			slide_right_finger_up(angle_conversion(t2,1))
-			while (d2 < d2_d and t1 > 41.47*pi/180):
-				t1 = t1 - 0.01
-				t2, d2 = finger_translation1(w0, wp, t1, d1)
-				#print (d1_d, d1, d2_d, d2)
-			# Call Right_Slide_Up(t1, t2)
-			#print (d1, d1_d, d2, d2_d)			
-			#slide_right_finger_up(0.4862-0.00181*(t1*180/pi-90))
-			print ("t1=",t1)
-			slide_left_finger_up(angle_conversion(t1,0))
-			d1t = d1
-			d2t = d2
-			#print (d1_d, d1, d2_d, d2)
-		t2, d2 = finger_translation1(w0, wp, t1_d, d1)
-		# Call Left_Slide_Up(t1_d, t2)
-		slide_left_finger_up(angle_conversion(t2,0))
-
-	else:	
-		while ((d1_d - d1) < 0.001 or (d2_d - d2) < 0.001):
-			while (d1 > d1_d and t2 > 41.47*pi/180):
-				t2 = t2 - 0.01
-				t1, d1 = finger_translation2(w0, wp, t2, d2)
-			#Call Left_Slide_Down(t1, t2)
-			slide_right_finger_down(angle_conversion(t1,0))
-			while (d2 > d2_d and t1 < 138.53*pi/180):
-				t1  = t1 + 0.01
-				t2, d2 = finger_translation1(w0, wp, t1, d1)
-			# Call Right_Slide_Down(t1, t2)
-			slide_left_finger_down(angle_conversion(t2,1))
-			d1t = d1
-			d2t = d2
-		t2, d2 = finger_translation1(w0, wp, t1_d, d1)
-		# Call Left_Slide_Down(t1_d, t2)
-		slide_left_finger_down(angle_conversion(t1_d,0))
-	#print (t1_d, t1, t2_d, t2)
-
 
 
 if __name__ == "__main__":
 	#Initial position of the object in the fingers 
-	d1 = 7.5
-	d2 = 7.5
+	d1 = 6
+	d2 = 6
 	#Starting angle of the fingers
 	t1 = np.pi/2
 	t2 = np.pi/2
@@ -200,9 +215,8 @@ if __name__ == "__main__":
 	wp = 5
 	#Desired position of the object
 	x=2.5
-	y=15
-
-	n = 3 # n = 1 -> Anticlockwise rotation, n = 0 -> Clockwise
+	y=11.5
+        n = 3 # n = 1 -> Anticlockwise rotation, n = 0 -> Clockwise
 	
 	#Hold object
 	rospy.wait_for_service('Hold_object')
@@ -252,3 +266,18 @@ if __name__ == "__main__":
 		rotate_object_clockwise(0.4862-0.00181*(t1f*180/pi-90))
 
 	finger_planning(x, y, w0, wp, t1, t2, d1, d2)	
+
+	'''while (t2 < 138.53*pi/180):
+		t2 = t2 + 0.01
+		t1, d1 = finger_translation2(w0, wp, t2, d2)
+	print("t2=",t2)
+	slide_right_finger_up(angle_conversion(t2,1))
+	print ("t1 = ", t1)
+	while (t1 > 41.47*pi/180):
+		t1 = t1 - 0.01
+		t2, d2 = finger_translation1(w0, wp, t1, d1)
+	print ("t1=",t1)
+	slide_left_finger_up(angle_conversion(t1,0))'''
+
+ 
+	
