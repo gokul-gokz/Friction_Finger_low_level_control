@@ -25,10 +25,7 @@ finger_controller::finger_controller(int num_fingers, float parameters[])
   }
   DynamixelNode D("XM",n);
   ros::spin ();
-  //ros::AsyncSpinner spinner(4); // Use 4 threads
-  //spinner.start();
-  //ros::waitForShutdown();
-  
+   
 }  
 
 
