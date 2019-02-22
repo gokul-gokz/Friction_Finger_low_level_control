@@ -2,7 +2,7 @@
   This repository contains the low level controller code and high level actions to interface with the friction finger gripper.
   This is a ROS package written in c++ and python.
   
-# Code Organization:
+## Code Organization:
   * include 
       * finger.hpp - Finger class declaration
       * controller_client.hpp - Function declaration of High level finger actions
@@ -16,10 +16,15 @@
       * Holdcommand.srv  
       * positioncommand.srv
       * SendFrictionSrface.srv
+      
+  ## Friction Finger Gripper
+  
   ![Friction_Finger_Gripper](https://github.com/gokul-gokz/Friction_Finger_low_level_control/blob/master/Images/Frcition_finger%20gripper.png)
   
   ## For Sliding an object
+  
   ![Sliding_object](https://github.com/gokul-gokz/Friction_Finger_low_level_control/blob/master/Images/Sliding.png)
   
   ## For Rotating an object
+  
   ![Rotate object](https://github.com/gokul-gokz/Friction_Finger_low_level_control/blob/master/Images/Actuation.png)
