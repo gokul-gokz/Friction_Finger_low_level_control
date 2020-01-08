@@ -16,6 +16,8 @@
       * Holdcommand.srv  
       * positioncommand.srv
       * SendFrictionSrface.srv
+  ## Experiment Setup
+  ![Experiment](https://github.com/gokul-gokz/Friction_Finger_low_level_control/blob/master/Images/Vf_system.jpg)
       
   ## Friction Finger Gripper
   
